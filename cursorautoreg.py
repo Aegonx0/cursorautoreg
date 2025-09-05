@@ -3,6 +3,7 @@ import random
 import string
 import pyperclip
 import time
+from faker import Faker
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QMessageBox
 from PyQt6.QtGui import QFont, QColor
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
@@ -11,9 +12,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-first_names = ["Lebron", "Michael", "Kobe", "Stephen", "Kevin", "James", "Chris", "Anthony"]
-last_names = ["George", "Bryant", "Jordan", "Curry", "Durant", "Harden", "Paul", "Davis"]
 
 class AutomationWorker(QThread):
     finished = pyqtSignal()
@@ -30,52 +28,63 @@ class AutomationWorker(QThread):
             copy_btn = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button#click-to-copy"))
             )
+            time.sleep(random.uniform(1,2))
             copy_btn.click()
+            time.sleep(random.uniform(0.5,1.5))
             temp_email = pyperclip.paste()
 
-            driver.execute_script("window.open('');")
-            driver.switch_to.window(driver.window_handles[1])
             driver.get("https://authenticator.cursor.sh/sign-up")
-
-            first_name = random.choice(first_names)
-            last_name = random.choice(last_names)
+            fake = Faker()
+            first_name = fake.first_name()
+            last_name = fake.last_name()
 
             first_name_input = WebDriverWait(driver, 30).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Your first name']"))
             )
+            time.sleep(random.uniform(0.5,1.5))
             first_name_input.clear()
             first_name_input.send_keys(first_name)
+            time.sleep(random.uniform(0.3,1.0))
 
             last_name_input = WebDriverWait(driver, 30).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Your last name']"))
             )
+            time.sleep(random.uniform(0.5,1.5))
             last_name_input.clear()
             last_name_input.send_keys(last_name)
+            time.sleep(random.uniform(0.3,1.0))
 
             email_input = WebDriverWait(driver, 30).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Your email address']"))
             )
+            time.sleep(random.uniform(0.5,1.5))
             email_input.clear()
             email_input.send_keys(temp_email)
+            time.sleep(random.uniform(0.3,1.0))
 
             continue_btn = WebDriverWait(driver, 30).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Continue')]"))
             )
+            time.sleep(random.uniform(0.5,1.5))
             continue_btn.click()
+            time.sleep(random.uniform(1,2))
 
             password = first_name + ''.join(random.choices(string.digits, k=4))
             password_input = WebDriverWait(driver, 30).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Create a password']"))
             )
+            time.sleep(random.uniform(0.5,1.5))
             password_input.clear()
             password_input.send_keys(password)
+            time.sleep(random.uniform(0.3,1.0))
 
             cont_pwd_btn = WebDriverWait(driver, 30).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Continue')]"))
             )
+            time.sleep(random.uniform(0.5,1.5))
             cont_pwd_btn.click()
+            time.sleep(random.uniform(2,3))
 
-            time.sleep(3)
             self.finished.emit()
         except Exception as e:
             self.error.emit(str(e))
@@ -84,7 +93,7 @@ class CursorAutoReg(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Cursor AutoReg")
-        self.setFixedSize(900, 500)
+        self.setFixedSize(700, 400)
         self.setStyleSheet("background-color: black;")
         self.worker = None
         self.initUI()
@@ -95,25 +104,25 @@ class CursorAutoReg(QWidget):
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.header = QLabel("Cursor AutoRegister")
-        self.header.setFont(QFont("Segoe UI", 32, QFont.Weight.Bold))
+        self.header.setFont(QFont("Segoe UI", 28, QFont.Weight.Bold))
         self.header.setStyleSheet("color: white; margin-bottom: 10px;")
         self.header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.header)
 
         self.title = QLabel("Made by Aegon")
-        self.title.setFont(QFont("Segoe UI", 28, QFont.Weight.Bold))
+        self.title.setFont(QFont("Segoe UI", 22, QFont.Weight.Bold))
         self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.title)
 
         self.start_btn = QPushButton("Start")
-        self.start_btn.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
+        self.start_btn.setFont(QFont("Segoe UI", 14, QFont.Weight.Bold))
         self.start_btn.setStyleSheet("""
             QPushButton {
                 background-color: #8B0000;
                 color: white;
-                border-radius: 12px;
-                padding: 10px;
-                min-width: 160px;
+                border-radius: 10px;
+                padding: 8px;
+                min-width: 140px;
             }
             QPushButton:hover {
                 background-color: #A52A2A;
@@ -126,14 +135,14 @@ class CursorAutoReg(QWidget):
         layout.addWidget(self.start_btn)
 
         self.stop_btn = QPushButton("Stop")
-        self.stop_btn.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
+        self.stop_btn.setFont(QFont("Segoe UI", 14, QFont.Weight.Bold))
         self.stop_btn.setStyleSheet("""
             QPushButton {
                 background-color: #8B0000;
                 color: white;
-                border-radius: 12px;
-                padding: 10px;
-                min-width: 160px;
+                border-radius: 10px;
+                padding: 8px;
+                min-width: 140px;
             }
             QPushButton:hover {
                 background-color: #A52A2A;
@@ -148,8 +157,6 @@ class CursorAutoReg(QWidget):
         self.setLayout(layout)
 
     def start_automation(self):
-        self.start_btn.setEnabled(False)
-        self.stop_btn.setEnabled(True)
         self.worker = AutomationWorker()
         self.worker.finished.connect(self.on_finished)
         self.worker.error.connect(self.on_error)
@@ -159,18 +166,12 @@ class CursorAutoReg(QWidget):
         if self.worker:
             self.worker.terminate()
             self.worker = None
-        self.start_btn.setEnabled(True)
-        self.stop_btn.setEnabled(False)
 
     def on_finished(self):
         QMessageBox.information(self, "Done", "Automation finished successfully!")
-        self.start_btn.setEnabled(True)
-        self.stop_btn.setEnabled(False)
 
     def on_error(self, msg):
         QMessageBox.critical(self, "Error", f"Automation failed:\n{msg}")
-        self.start_btn.setEnabled(True)
-        self.stop_btn.setEnabled(False)
 
     def startRainbowAnimation(self):
         self.colors = [QColor("red"), QColor("orange"), QColor("yellow"),
