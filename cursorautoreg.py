@@ -6,8 +6,8 @@ import re
 import time
 from faker import Faker
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel
-from PyQt6.QtGui import QFont
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtGui import QFont, QColor
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -52,9 +52,7 @@ class AutomationWorker(QThread):
             EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Continue')]"))
         ).click()
 
-        # Normally fetch verification code here ...
-        # Example placeholder:
-        time.sleep(3)
+        time.sleep(3)  # placeholder for verification
 
         self.finished.emit()
 
@@ -63,29 +61,30 @@ class CursorAutoReg(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Cursor AutoReg")
-        self.setFixedSize(700, 400)
+        self.setFixedSize(900, 500)
         self.setStyleSheet("background-color: black;")
         self.worker = None
         self.initUI()
+        self.startRainbowAnimation()
 
     def initUI(self):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        title = QLabel("Made by Aegon")
-        title.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
-        title.setStyleSheet("color: white; margin-bottom: 40px;")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title)
+        self.title = QLabel("Made by Aegon")
+        self.title.setFont(QFont("Segoe UI", 36, QFont.Weight.Bold))
+        self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.title)
 
         self.start_btn = QPushButton("Start")
-        self.start_btn.setFont(QFont("Segoe UI", 18, QFont.Weight.Bold))
+        self.start_btn.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
         self.start_btn.setStyleSheet("""
             QPushButton {
                 background-color: #8B0000;
                 color: white;
-                border-radius: 15px;
-                padding: 15px;
+                border-radius: 12px;
+                padding: 10px;
+                min-width: 150px;
             }
             QPushButton:hover {
                 background-color: #A52A2A;
@@ -98,13 +97,14 @@ class CursorAutoReg(QWidget):
         layout.addWidget(self.start_btn)
 
         self.stop_btn = QPushButton("Stop")
-        self.stop_btn.setFont(QFont("Segoe UI", 18, QFont.Weight.Bold))
+        self.stop_btn.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
         self.stop_btn.setStyleSheet("""
             QPushButton {
                 background-color: #8B0000;
                 color: white;
-                border-radius: 15px;
-                padding: 15px;
+                border-radius: 12px;
+                padding: 10px;
+                min-width: 150px;
             }
             QPushButton:hover {
                 background-color: #A52A2A;
@@ -130,6 +130,20 @@ class CursorAutoReg(QWidget):
 
     def on_finished(self):
         print("Automation finished")
+
+    # Rainbow animation for "Made by Aegon"
+    def startRainbowAnimation(self):
+        self.colors = [QColor("red"), QColor("orange"), QColor("yellow"),
+                       QColor("green"), QColor("blue"), QColor("indigo"), QColor("violet")]
+        self.color_index = 0
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.updateRainbowColor)
+        self.timer.start(300)
+
+    def updateRainbowColor(self):
+        color = self.colors[self.color_index]
+        self.title.setStyleSheet(f"color: {color.name()};")
+        self.color_index = (self.color_index + 1) % len(self.colors)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
