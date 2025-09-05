@@ -33,14 +33,15 @@ class AutomationWorker(QThread):
             time.sleep(random.uniform(0.5,1.5))
             temp_email = pyperclip.paste()
 
-            driver.execute_script("window.open('https://authenticator.cursor.sh/sign-up', '_blank');")
+            driver.execute_script("window.open('');")
             driver.switch_to.window(driver.window_handles[1])
+            driver.get("https://authenticator.cursor.sh/sign-up")
 
             fake = Faker()
             first_name = fake.first_name()
             last_name = fake.last_name()
 
-            first_name_input = WebDriverWait(driver, 30).until(
+            first_name_input = WebDriverWait(driver, 600).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Your first name']"))
             )
             time.sleep(random.uniform(0.5,1.5))
@@ -48,35 +49,23 @@ class AutomationWorker(QThread):
             first_name_input.send_keys(first_name)
             time.sleep(random.uniform(0.3,1.0))
 
-            last_name_input = WebDriverWait(driver, 30).until(
-                EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Your last name']"))
-            )
-            time.sleep(random.uniform(0.5,1.5))
+            last_name_input = driver.find_element(By.XPATH, "//input[@placeholder='Your last name']")
             last_name_input.clear()
             last_name_input.send_keys(last_name)
             time.sleep(random.uniform(0.3,1.0))
 
-            email_input = WebDriverWait(driver, 30).until(
-                EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Your email address']"))
-            )
-            time.sleep(random.uniform(0.5,1.5))
+            email_input = driver.find_element(By.XPATH, "//input[@placeholder='Your email address']")
             email_input.clear()
             email_input.send_keys(temp_email)
             time.sleep(random.uniform(0.3,1.0))
 
-            continue_btn = WebDriverWait(driver, 30).until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Continue')]"))
-            )
-            time.sleep(random.uniform(0.5,1.5))
-            continue_btn.click()
+            QMessageBox.information(None, "Action Required",
+                "Please solve the CAPTCHA and click Continue on the Cursor website manually, then press OK here to continue automation.")
 
-            # Pause for CAPTCHA manually
-            WebDriverWait(driver, 600).until(
+            password_input = WebDriverWait(driver, 30).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Create a password']"))
             )
-
             password = first_name + ''.join(random.choices(string.digits, k=4))
-            password_input = driver.find_element(By.XPATH, "//input[@placeholder='Create a password']")
             password_input.clear()
             password_input.send_keys(password)
             time.sleep(random.uniform(0.3,1.0))
@@ -84,9 +73,8 @@ class AutomationWorker(QThread):
             cont_pwd_btn = WebDriverWait(driver, 30).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Continue')]"))
             )
-            time.sleep(random.uniform(0.5,1.5))
             cont_pwd_btn.click()
-            time.sleep(random.uniform(2,3))
+            time.sleep(random.uniform(1,2))
 
             self.finished.emit()
         except Exception as e:
