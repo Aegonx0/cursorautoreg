@@ -148,6 +148,8 @@ class CursorAutoReg(QWidget):
         self.setLayout(layout)
 
     def start_automation(self):
+        self.start_btn.setEnabled(False)
+        self.stop_btn.setEnabled(True)
         self.worker = AutomationWorker()
         self.worker.finished.connect(self.on_finished)
         self.worker.error.connect(self.on_error)
@@ -157,12 +159,18 @@ class CursorAutoReg(QWidget):
         if self.worker:
             self.worker.terminate()
             self.worker = None
+        self.start_btn.setEnabled(True)
+        self.stop_btn.setEnabled(False)
 
     def on_finished(self):
         QMessageBox.information(self, "Done", "Automation finished successfully!")
+        self.start_btn.setEnabled(True)
+        self.stop_btn.setEnabled(False)
 
     def on_error(self, msg):
         QMessageBox.critical(self, "Error", f"Automation failed:\n{msg}")
+        self.start_btn.setEnabled(True)
+        self.stop_btn.setEnabled(False)
 
     def startRainbowAnimation(self):
         self.colors = [QColor("red"), QColor("orange"), QColor("yellow"),
