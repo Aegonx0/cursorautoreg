@@ -1,4 +1,4 @@
-name: Build EXE
+name: Build PyQt6 EXE
 
 on:
   push:
@@ -11,22 +11,25 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: "3.11"
 
-      - name: Install PyInstaller
-        run: pip install pyinstaller
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pyqt6 faker selenium pyperclip
 
-      - name: Build with PyInstaller
-        run: pyinstaller --onefile --windowed cursorautoreg.py
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Build EXE
+        run: |
+          pyinstaller --onefile --windowed cursorautoreg.py
+          
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v3
         with:
           name: cursorautoreg-exe
           path: dist/cursorautoreg.exe
