@@ -24,6 +24,7 @@ class AutomationWorker(QThread):
             driver = webdriver.Chrome(options=options)
             driver.maximize_window()
 
+            # Temp Mail
             driver.get("https://temp-mail.org/en/")
             copy_btn = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button#click-to-copy"))
@@ -33,7 +34,10 @@ class AutomationWorker(QThread):
             time.sleep(random.uniform(0.5,1.5))
             temp_email = pyperclip.paste()
 
-            driver.get("https://authenticator.cursor.sh/sign-up")
+            # Cursor Sign-Up (opens in new tab so temp mail stays open)
+            driver.execute_script("window.open('https://authenticator.cursor.sh/sign-up', '_blank');")
+            driver.switch_to.window(driver.window_handles[1])
+
             fake = Faker()
             first_name = fake.first_name()
             last_name = fake.last_name()
