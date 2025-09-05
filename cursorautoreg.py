@@ -2,7 +2,6 @@ import sys
 import random
 import string
 import pyperclip
-import re
 import time
 from faker import Faker
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QMessageBox
@@ -23,9 +22,10 @@ class AutomationWorker(QThread):
         try:
             options = Options()
             options.add_argument("--incognito")
-            driver = webdriver.Chrome(options=options)  # FIXED: no executable_path
+            driver = webdriver.Chrome(options=options)  # ✅ works in Selenium 4+
             driver.maximize_window()
 
+            # --- Temp Mail ---
             driver.get("https://temp-mail.org/en/")
             copy_btn = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button#click-to-copy"))
@@ -33,28 +33,50 @@ class AutomationWorker(QThread):
             copy_btn.click()
             temp_email = pyperclip.paste()
 
+            # --- Cursor Auth ---
             driver.get("https://authenticator.cursor.sh/sign-up")
 
             fake = Faker()
             first_name = fake.first_name()
             last_name = fake.last_name()
 
-            WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "firstName"))).send_keys(first_name)
-            driver.find_element(By.NAME, "lastName").send_keys(last_name)
-            driver.find_element(By.NAME, "email").send_keys(temp_email)
+            first_name_input = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.NAME, "firstName"))
+            )
+            first_name_input.clear()
+            first_name_input.send_keys(first_name)
 
-            WebDriverWait(driver, 20).until(
+            last_name_input = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.NAME, "lastName"))
+            )
+            last_name_input.clear()
+            last_name_input.send_keys(last_name)
+
+            email_input = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.NAME, "email"))
+            )
+            email_input.clear()
+            email_input.send_keys(temp_email)
+
+            continue_btn = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Continue')]"))
-            ).click()
+            )
+            continue_btn.click()
 
+            # --- Password ---
             password = first_name + ''.join(random.choices(string.digits, k=4))
-            WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(password)
+            password_input = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.NAME, "password"))
+            )
+            password_input.clear()
+            password_input.send_keys(password)
 
-            WebDriverWait(driver, 20).until(
+            cont_pwd_btn = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Continue')]"))
-            ).click()
+            )
+            cont_pwd_btn.click()
 
-            # TODO: implement verification email fetching properly
+            # Placeholder for email verification
             time.sleep(3)
 
             self.finished.emit()
@@ -76,11 +98,19 @@ class CursorAutoReg(QWidget):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        # --- Title Labels ---
+        self.header = QLabel("Cursor AutoRegister")
+        self.header.setFont(QFont("Segoe UI", 32, QFont.Weight.Bold))
+        self.header.setStyleSheet("color: white; margin-bottom: 10px;")
+        self.header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.header)
+
         self.title = QLabel("Made by Aegon")
-        self.title.setFont(QFont("Segoe UI", 36, QFont.Weight.Bold))
+        self.title.setFont(QFont("Segoe UI", 28, QFont.Weight.Bold))
         self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.title)
 
+        # --- Buttons ---
         self.start_btn = QPushButton("Start")
         self.start_btn.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
         self.start_btn.setStyleSheet("""
