@@ -24,7 +24,6 @@ class AutomationWorker(QThread):
             driver = webdriver.Chrome(options=options)
             driver.maximize_window()
 
-            # Temp Mail
             driver.get("https://temp-mail.org/en/")
             copy_btn = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button#click-to-copy"))
@@ -34,7 +33,6 @@ class AutomationWorker(QThread):
             time.sleep(random.uniform(0.5,1.5))
             temp_email = pyperclip.paste()
 
-            # Cursor Sign-Up (opens in new tab so temp mail stays open)
             driver.execute_script("window.open('https://authenticator.cursor.sh/sign-up', '_blank');")
             driver.switch_to.window(driver.window_handles[1])
 
@@ -71,13 +69,14 @@ class AutomationWorker(QThread):
             )
             time.sleep(random.uniform(0.5,1.5))
             continue_btn.click()
-            time.sleep(random.uniform(1,2))
 
-            password = first_name + ''.join(random.choices(string.digits, k=4))
-            password_input = WebDriverWait(driver, 30).until(
+            # Pause for CAPTCHA manually
+            WebDriverWait(driver, 600).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Create a password']"))
             )
-            time.sleep(random.uniform(0.5,1.5))
+
+            password = first_name + ''.join(random.choices(string.digits, k=4))
+            password_input = driver.find_element(By.XPATH, "//input[@placeholder='Create a password']")
             password_input.clear()
             password_input.send_keys(password)
             time.sleep(random.uniform(0.3,1.0))
