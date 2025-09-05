@@ -13,7 +13,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# ---------------- AUTOMATION ----------------
 class AutomationWorker(QThread):
     finished = pyqtSignal()
     error = pyqtSignal(str)
@@ -22,10 +21,9 @@ class AutomationWorker(QThread):
         try:
             options = Options()
             options.add_argument("--incognito")
-            driver = webdriver.Chrome(options=options)  # ✅ works in Selenium 4+
+            driver = webdriver.Chrome(options=options)
             driver.maximize_window()
 
-            # --- Temp Mail ---
             driver.get("https://temp-mail.org/en/")
             copy_btn = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button#click-to-copy"))
@@ -33,57 +31,52 @@ class AutomationWorker(QThread):
             copy_btn.click()
             temp_email = pyperclip.paste()
 
-            # --- Cursor Auth ---
             driver.get("https://authenticator.cursor.sh/sign-up")
 
             fake = Faker()
             first_name = fake.first_name()
             last_name = fake.last_name()
 
-            first_name_input = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.NAME, "firstName"))
+            first_name_input = WebDriverWait(driver, 30).until(
+                EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Your first name']"))
             )
             first_name_input.clear()
             first_name_input.send_keys(first_name)
 
-            last_name_input = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.NAME, "lastName"))
+            last_name_input = WebDriverWait(driver, 30).until(
+                EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Your last name']"))
             )
             last_name_input.clear()
             last_name_input.send_keys(last_name)
 
-            email_input = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.NAME, "email"))
+            email_input = WebDriverWait(driver, 30).until(
+                EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Your email address']"))
             )
             email_input.clear()
             email_input.send_keys(temp_email)
 
-            continue_btn = WebDriverWait(driver, 20).until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Continue')]"))
+            continue_btn = WebDriverWait(driver, 30).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Continue')]"))
             )
             continue_btn.click()
 
-            # --- Password ---
             password = first_name + ''.join(random.choices(string.digits, k=4))
-            password_input = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.NAME, "password"))
+            password_input = WebDriverWait(driver, 30).until(
+                EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Create a password']"))
             )
             password_input.clear()
             password_input.send_keys(password)
 
-            cont_pwd_btn = WebDriverWait(driver, 20).until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Continue')]"))
+            cont_pwd_btn = WebDriverWait(driver, 30).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Continue')]"))
             )
             cont_pwd_btn.click()
 
-            # Placeholder for email verification
             time.sleep(3)
-
             self.finished.emit()
         except Exception as e:
             self.error.emit(str(e))
 
-# ---------------- GUI ----------------
 class CursorAutoReg(QWidget):
     def __init__(self):
         super().__init__()
@@ -98,7 +91,6 @@ class CursorAutoReg(QWidget):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # --- Title Labels ---
         self.header = QLabel("Cursor AutoRegister")
         self.header.setFont(QFont("Segoe UI", 32, QFont.Weight.Bold))
         self.header.setStyleSheet("color: white; margin-bottom: 10px;")
@@ -110,7 +102,6 @@ class CursorAutoReg(QWidget):
         self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.title)
 
-        # --- Buttons ---
         self.start_btn = QPushButton("Start")
         self.start_btn.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
         self.start_btn.setStyleSheet("""
@@ -170,7 +161,6 @@ class CursorAutoReg(QWidget):
     def on_error(self, msg):
         QMessageBox.critical(self, "Error", f"Automation failed:\n{msg}")
 
-    # Rainbow animation for "Made by Aegon"
     def startRainbowAnimation(self):
         self.colors = [QColor("red"), QColor("orange"), QColor("yellow"),
                        QColor("green"), QColor("blue"), QColor("indigo"), QColor("violet")]
